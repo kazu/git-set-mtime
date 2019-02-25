@@ -13,7 +13,7 @@ deps:
 devel-deps: deps
 	GO111MODULE=off go get ${u} \
 	  golang.org/x/lint/golint            \
-	  github.com/mattn/goverallsa         \
+	  github.com/mattn/goveralls          \
 	  github.com/Songmu/goxz/cmd/goxz     \
 	  github.com/Songmu/godzil/cmd/godzil \
 	  github.com/tcnksm/ghr
