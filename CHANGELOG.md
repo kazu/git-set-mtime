@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.0](https://github.com/Songmu/git-set-mtime/compare/v0.1.2...v0.2.0) (2019-02-25)
+
+* introduce go modules and godzil [#10](https://github.com/Songmu/git-set-mtime/pull/10) ([Songmu](https://github.com/Songmu))
+* drop concurrent processing for simplify the code [#9](https://github.com/Songmu/git-set-mtime/pull/9) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.2](https://github.com/Songmu/git-set-mtime/compare/v0.1.1...v0.1.2) (2018-08-13)
 
 * Explicitly close the pipe and ignore SIGPIPE [#8](https://github.com/Songmu/git-set-mtime/pull/8) ([Songmu](https://github.com/Songmu))
