@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -51,6 +52,45 @@ func main() {
 
 var commiterReg = regexp.MustCompile(`^committer .*? (\d+) (?:[-+]\d+)$`)
 
+func skipLocalModified(files []string) []string {
+	cmd := exec.Command("git", "status", "-s", ".")
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		return files
+	}
+	cmd.Start()
+
+	scanner := bufio.NewScanner(out)
+	excludes := make([]string, 0, len(files))
+	for scanner.Scan() {
+		words := strings.Split(scanner.Text(), " ")
+		if len(words) == 0 {
+			continue
+		}
+		excludes = append(excludes, words[len(words)-1])
+	}
+	cmd.Wait()
+	sort.Slice(excludes, func(i, j int) bool { return excludes[i] < excludes[j] })
+
+	skipList := make([]int, 0, len(files))
+	skipCnt := 0
+
+	for j, file := range files {
+		idx := sort.Search(len(excludes), func(i int) bool { return excludes[i] >= file })
+		if idx < len(excludes) && excludes[idx] == file {
+			skipList = append(skipList, j)
+			skipCnt++
+		}
+	}
+
+	for j := len(skipList) - 1; j > 0; j-- {
+		i := skipList[j]
+		files = append(files[:i-1], files[i+1:]...)
+	}
+
+	return files
+}
+
 func run(args []string) error {
 	if len(args) > 0 {
 		fmt.Fprintln(os.Stderr, help())
@@ -61,7 +101,8 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
-	files := strings.Split(strings.TrimRight(string(out), "\x00"), "\x00")
+
+	files := skipLocalModified(strings.Split(strings.TrimRight(string(out), "\x00"), "\x00"))
 	gitlogCmd := exec.Command(
 		"git", "log", "-m", "-r", "--name-only", "--no-color", "--pretty=raw", "-z")
 	pipe, err := gitlogCmd.StdoutPipe()
